@@ -32,7 +32,7 @@ class IseGeneration:
         self.file.write('GO')
         self.file.write('\n')
         self.file.write('\n')
-        self.file.write('DBCC CHECKIDENT (medewerker_op_project, RESEED, 0)')
+        self.file.write('DBCC CHECKIDENT (medewerker_op_project, RESEED, 1)')
         self.file.write('\n')
         self.file.write('\n')
 
@@ -162,7 +162,7 @@ class IseGeneration:
                 if month > 12:
                     month = 1
                     year += 1
-                if ran.randrange(2) == 0:
+                if ran.randrange(1) == 0:
                     medewerker_uren = ran.randrange(182)
                     self.medewerker_ingepland_project.append([id, medewerker_uren, maand_datum])
                     self.file.write("INSERT INTO medewerker_ingepland_project VALUES ({}, {}, {})".format(id, medewerker_uren, maand_datum))
@@ -182,7 +182,7 @@ class IseGeneration:
                     month = 1
                     year += 1
 
-                if ran.randrange(2) == 0:
+                if ran.randrange(1) == 0:
                     beschikbaar_uren = ran.randrange(182)
                     self.file.write(
                         "INSERT INTO medewerker_beschikbaarheid VALUES ('{}', {}, {})".format(medewerker_code, maand,
