@@ -117,7 +117,7 @@ class IseGeneration:
             medewerker_code = x[0]
             first_loop = True
 
-            while (ran.randrange(2) == 0 or first_loop) and len(beschikbare_rollen) != 0:
+            while (ran.randrange(4) == 0 or first_loop) and len(beschikbare_rollen) != 0:
                 first_loop = False
                 medewerker_rol = beschikbare_rollen[ran.randrange(len(beschikbare_rollen))]
                 beschikbare_rollen.remove(medewerker_rol)
@@ -183,7 +183,7 @@ class IseGeneration:
                     year += 1
 
                 if ran.randrange(1) == 0:
-                    beschikbaar_uren = ran.randrange(182)
+                    beschikbaar_uren = ran.randrange(35)
                     self.file.write(
                         "INSERT INTO medewerker_beschikbaarheid VALUES ('{}', {}, {})".format(medewerker_code, maand,
                                                                                               beschikbaar_uren))
@@ -192,7 +192,5 @@ class IseGeneration:
         self.file.write('\n')
 
 
-
-
-generator = IseGeneration(5, 25, 3, 28, 6)
+generator = IseGeneration(9, 25, 3, 28, 6)
 generator.create_insert_script()
