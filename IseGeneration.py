@@ -36,7 +36,7 @@ class IseGeneration:
         self.file.write('GO')
         self.file.write('\n')
         self.file.write('\n')
-        self.file.write('DBCC CHECKIDENT (medewerker_op_project, RESEED, 0)')
+        self.file.write('DBCC CHECKIDENT (medewerker_op_project, RESEED, 1)')
         self.file.write('\n')
         self.file.write('\n')
 
@@ -120,6 +120,7 @@ class IseGeneration:
             self.medewerker_rol_type.append(medewerker_rol)
             self.file.write("INSERT INTO medewerker_rol_type VALUES ({})".format(medewerker_rol))
             self.file.write('\n')
+        self.file.write("INSERT INTO medewerker_rol_type VALUES ('Projectleider') \n")
         self.file.write('\n')
 
     def fill_medewerker_rol(self):
