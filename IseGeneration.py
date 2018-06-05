@@ -2,6 +2,7 @@ from datetime import datetime as dt, date
 import RandomGenerator as gen
 import random as ran
 
+
 class IseGeneration:
     def __init__(self,
                  project_categories_amount,
@@ -9,7 +10,8 @@ class IseGeneration:
                  project_rol_amount,
                  medewerker_amount,
                  medewerker_rol_type_amount,
-                 categorie_tag_amount):
+                 categorie_tag_amount,
+                 subproject_categorie_amount):
 
         self.project_categories_amount = project_categories_amount
         self.project_amount = project_amount
@@ -17,6 +19,7 @@ class IseGeneration:
         self.medewerker_amount = medewerker_amount
         self.medewerker_rol_type_amount = medewerker_rol_type_amount
         self.categorie_tag_amount = categorie_tag_amount
+        self.subproject_categorie_amount = subproject_categorie_amount
 
         self.project_categorie = []
         self.project = []
@@ -29,6 +32,9 @@ class IseGeneration:
         self.medewerker_ingepland_project = []
         self.categorie_tag = []
         self.tag_van_categorie = []
+        self.projectlid_op_subproject = []
+        self.subproject = []
+        self.subproject_categorie = []
 
         self.file = open('generated.sql', 'w+')
         self.file.write('USE LeanDb')
@@ -40,7 +46,6 @@ class IseGeneration:
         self.file.write('\n')
         self.file.write('\n')
 
-
     def create_insert_script(self):
         # self.file.write('BEGIN TRANSACTION')
         # self.file.write('\n')
@@ -48,7 +53,6 @@ class IseGeneration:
         self.fill_project()
         self.fill_project_rol_type()
         self.fill_medewerker()
-        self.fill_project_rol_type()
         self.fill_medewerker_rol_type()
         self.fill_medewerker_rol()
         self.fill_medewerker_op_project()
@@ -56,6 +60,9 @@ class IseGeneration:
         self.fill_medewerker_beschikbaarheid()
         self.fill_categorie_tag()
         self.fill_tag_van_categorie()
+        self.fill_subproject_categorie()
+        self.fill_subproject()
+        self.fill_projectlid_op_subproject()
         # self.file.write('ROLLBACK TRANSACTION')
         # self.file.write('\n')
 
@@ -85,7 +92,11 @@ class IseGeneration:
             project_code = project_naam[:5] + str(begin_datum.year) + "'"
             verwachte_uren = ran.randrange(10000)
             self.project.append([project_code, categorie_naam, begin_datum, eind_datum, project_naam, verwachte_uren])
-            self.file.write("INSERT INTO project VALUES ({}, {}, '{}', '{}', {}, {})".format(project_code, categorie_naam, begin_datum.strftime('%Y/%m/%d'), eind_datum.strftime('%m/%d/%Y'), project_naam, verwachte_uren))
+            self.file.write(
+                "INSERT INTO project VALUES ({}, {}, '{}', '{}', {}, {})".format(project_code, categorie_naam,
+                                                                                 begin_datum.strftime('%Y/%m/%d'),
+                                                                                 eind_datum.strftime('%m/%d/%Y'),
+                                                                                 project_naam, verwachte_uren))
             self.file.write('\n')
         self.file.write('\n')
 
@@ -95,6 +106,7 @@ class IseGeneration:
             self.project_rol_type.append(project_rol)
             self.file.write("INSERT INTO project_rol_type VALUES ({})".format(project_rol))
             self.file.write('\n')
+        self.file.write("INSERT INTO project_rol_type VALUES ('Projectleider') \n")
         self.file.write('\n')
 
     def fill_medewerker(self):
@@ -108,9 +120,9 @@ class IseGeneration:
             if medewerker_code_count != 0:
                 medewerker_code += str(medewerker_code_count)
 
-
             self.medewerker.append([medewerker_code, voornaam, achternaam])
-            self.file.write("INSERT INTO medewerker VALUES('{}', '{}', '{}')".format(medewerker_code, voornaam, achternaam))
+            self.file.write(
+                "INSERT INTO medewerker VALUES('{}', '{}', '{}')".format(medewerker_code, voornaam, achternaam))
             self.file.write('\n')
         self.file.write('\n')
 
@@ -120,7 +132,7 @@ class IseGeneration:
             self.medewerker_rol_type.append(medewerker_rol)
             self.file.write("INSERT INTO medewerker_rol_type VALUES ({})".format(medewerker_rol))
             self.file.write('\n')
-        self.file.write("INSERT INTO medewerker_rol_type VALUES ('Projectleider') \n")
+        self.file.write("INSERT INTO medewerker_rol_type VALUES ('Superuser') \n")
         self.file.write('\n')
 
     def fill_medewerker_rol(self):
@@ -145,14 +157,16 @@ class IseGeneration:
             medewerker_code = x[0]
             first_loop = True
 
-            while (ran.randrange(2) == 0 or first_loop) and len(beschikbare_projecten) != 0:
+            while (ran.randrange(100) < 80 or first_loop) and len(beschikbare_projecten) != 0:
                 first_loop = False
                 id = id_teller
                 id_teller += 1
                 project_code = beschikbare_projecten[ran.randrange(len(beschikbare_projecten))][0]
                 project_rol = self.project_rol_type[ran.randrange(len(self.project_rol_type))]
                 self.medewerker_op_project.append([id, project_code, medewerker_code, project_rol])
-                self.file.write("INSERT INTO medewerker_op_project (project_code, medewerker_code, project_rol) VALUES ({}, '{}', {})".format(project_code, medewerker_code, project_rol))
+                self.file.write(
+                    "INSERT INTO medewerker_op_project (project_code, medewerker_code, project_rol) VALUES ({}, '{}', {})".format(
+                        project_code, medewerker_code, project_rol))
                 self.file.write('\n')
         self.file.write('\n')
 
@@ -177,7 +191,9 @@ class IseGeneration:
                 if ran.randrange(1) == 0:
                     medewerker_uren = ran.randrange(75)
                     self.medewerker_ingepland_project.append([id, medewerker_uren, maand_datum])
-                    self.file.write("INSERT INTO medewerker_ingepland_project VALUES ({}, {}, {})".format(id, medewerker_uren, maand_datum))
+                    self.file.write(
+                        "INSERT INTO medewerker_ingepland_project VALUES ({}, {}, {})".format(id, medewerker_uren,
+                                                                                              maand_datum))
                     self.file.write('\n')
         self.file.write('\n')
 
@@ -213,7 +229,7 @@ class IseGeneration:
 
     def fill_tag_van_categorie(self):
         for x in self.project_categorie:
-            beschikbare_tags= self.categorie_tag.copy()
+            beschikbare_tags = self.categorie_tag.copy()
             categorie_naam = x[0]
             first_loop = True
 
@@ -226,6 +242,51 @@ class IseGeneration:
                 self.file.write('\n')
         self.file.write('\n')
 
+    def fill_subproject_categorie(self):
+        for x in range(self.subproject_categorie_amount):
+            categorie_naam = "'" + gen.generate_alpha_string(ran.randrange(4, 12)) + "'"
+            self.subproject_categorie.append(categorie_naam)
+            self.file.write("INSERT INTO subproject_categorie VALUES ({})".format(categorie_naam))
+            self.file.write('\n')
+        self.file.write('\n')
 
-generator = IseGeneration(9, 30, 3, 28, 6, 17)
+    def fill_subproject(self):
+        for x in self.project:
+            project_code = x[0]
+            first_loop = True
+            while ran.randrange(100) > 65 or first_loop:
+                first_loop = False
+                subproject_naam = "'" + gen.generate_alpha_string(ran.randrange(5, 20)) + "'"
+                subproject_categorie_naam = self.subproject_categorie[ran.randrange(len(self.subproject_categorie))]
+                subproject_verwachte_uren = ran.randrange(x[5])
+                self.subproject.append(
+                    [project_code, subproject_naam, subproject_categorie_naam, subproject_verwachte_uren])
+                self.file.write("INSERT INTO subproject VALUES ({}, {}, {}, {})".format(project_code, subproject_naam,
+                                                                                          subproject_categorie_naam,
+                                                                                          subproject_verwachte_uren))
+                self.file.write('\n')
+        self.file.write('\n')
+
+    def fill_projectlid_op_subproject(self):
+        for x in self.subproject:
+            beschikbare_medewerkers = self.medewerker_op_project.copy()
+            project_code = x[0]
+            subproject_naam = x[1]
+            first_loop = True
+            while (ran.randrange(100) < 65 or first_loop) and len(beschikbare_medewerkers) > 0:
+                first_loop = False
+                medewerker = beschikbare_medewerkers[ran.randrange(len(beschikbare_medewerkers))]
+                beschikbare_medewerkers.remove(medewerker)
+                id = medewerker[0]
+                subproject_uren = ran.randrange(0, 20)
+                self.projectlid_op_subproject.append([id, project_code, subproject_naam, subproject_uren])
+                self.file.write(
+                    "INSERT INTO projectlid_op_subproject VALUES ({}, {}, {}, {})".format(id, project_code,
+                                                                                            subproject_naam,
+                                                                                            subproject_uren))
+                self.file.write('\n')
+        self.file.write('\n')
+
+
+generator = IseGeneration(9, 30, 3, 28, 6, 17, 6)
 generator.create_insert_script()
